@@ -5,6 +5,7 @@ go 1.23.1
 require github.com/fatih/color v1.17.0
 
 require (
+	github.com/golang-jwt/jwt/v5 v5.2.1 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	golang.org/x/crypto v0.27.0 // indirect
 	golang.org/x/net v0.28.0 // indirect

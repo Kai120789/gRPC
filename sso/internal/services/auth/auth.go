@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log/slog"
 	"sso/internal/domain/models"
+	"sso/internal/lib/jwt"
 	"sso/internal/lib/logger/sl"
 	"sso/internal/storage"
 	"time"
@@ -98,6 +99,15 @@ func (a *Auth) Login(
 	}
 
 	log.Info("user is logged in successfuly")
+
+	token, err := jwt.NewToken(user, app, a.tokenTTL)
+	if err != nil {
+		a.log.Error("failed to generate token", sl.Err(err))
+
+		return "", fmt.Errorf("%s: %w", op, err)
+	}
+
+	return token, nil
 }
 
 func (a *Auth) RegisterNewUser(ctx context.Context, email string, pass string) (int64, error) {
@@ -130,5 +140,21 @@ func (a *Auth) RegisterNewUser(ctx context.Context, email string, pass string) (
 }
 
 func (a *Auth) IsAdmin(ctx context.Context, userID int64) (bool, error) {
-	panic("not implemented")
+	const op = "Auth.IsAdmin"
+
+	log := a.log.With(
+		slog.String("op", op),
+		slog.Int64("user_id", userID),
+	)
+
+	log.Info("checking if user is admin")
+
+	isAdmin, err := a.usrProvider.IsAdmin(ctx, userID)
+	if err != nil {
+		return false, fmt.Errorf("%s: %w", op, err)
+	}
+
+	log.Info("checked if user is admin", slog.Bool("is_admin", isAdmin))
+
+	return isAdmin, nil
 }
